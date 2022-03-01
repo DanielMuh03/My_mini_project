@@ -6,12 +6,11 @@ from rest_framework import permissions
 from rest_framework.routers import DefaultRouter
 
 from music import settings
-from main.views import CategoryListView, PostsView, MusicImageView, CommentViewSet
+from main.views import CategoryListView, PostsView, MusicImageView, CommentViewSet, FavoriteViewSet, CommentsView
 from drf_yasg import openapi
 
 router = DefaultRouter()
 router.register('posts', PostsView)
-router.register('comment', CommentViewSet)
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -32,6 +31,8 @@ urlpatterns = [
     path('v1/api/categories/', CategoryListView.as_view()),
     path('v1/api/add-image/', MusicImageView.as_view()),
     path('v1/api/account/', include('account.urls')),
+    path('v1/api/posts/<int:id>/comments/', CommentsView.as_view()),
+    path('v1/api/posts/<int:id>/favorite/', FavoriteViewSet.as_view()),
     path('v1/api/', include(router.urls)),
     path('', schema_view.with_ui()),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

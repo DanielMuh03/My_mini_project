@@ -28,10 +28,18 @@ class PostImage(models.Model):
 
 
 class Comment(models.Model):
-    comment = models.TextField()
-    author = models.ForeignKey(MainUser, on_delete=models.DO_NOTHING, related_name='commenty')
-    reply = models.ForeignKey(Music, on_delete=models.CASCADE, related_name='commenty')
-    created = models.DateTimeField(auto_now_add=True)
+    post = models.ForeignKey(Music, on_delete=models.CASCADE, related_name='comments')
+    author = models.ForeignKey(MainUser, on_delete=models.CASCADE)
+    content = models.TextField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    likes = models.ManyToManyField(MainUser,
+                                   related_name='likers',
+                                   blank=True)
 
     def __str__(self):
-        return self.comment
+        return self.post
+
+
+class Favorite(models.Model):
+    film = models.ForeignKey(Music, on_delete=models.CASCADE)
+    user = models.ForeignKey(MainUser, on_delete=models.CASCADE)

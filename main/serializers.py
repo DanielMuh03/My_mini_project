@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from rest_framework.fields import SerializerMethodField
+
 from .models import *
 
 
@@ -53,13 +55,29 @@ class MusicImageSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    author = serializers.ReadOnlyField(source='author')
+    # reply_count = SerializerMethodField()
+    author = SerializerMethodField()
 
     class Meta:
         model = Comment
-        fields = '__all__'
+        exclude = ('content', )
 
-    def create(self, validated_data):
-        author = self.context.get('request').user
-        comment = Comment.objects.create(author=author, **validated_data)
-        return comment
+    def get_author(self, obj):
+        return obj.author.username
+
+    def to_representation(self, instance):
+        representation = super(CommentSerializer, self).to_representation(instance)
+        representation['likes'] = instance.likes.count()
+        action = self.context.get('action')
+        if action == 'list':
+            representation['comments'] = instance.content
+
+        else:
+             representation['comments'] = CommentSerializer(instance.parent.first(), many=True).data
+        return representation
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Favorite
+        fields = '__all__'
